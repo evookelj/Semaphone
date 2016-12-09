@@ -7,13 +7,16 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/sem.h>
+#include <string.h>
 
+/*
 union semun {
 	int val;
 	struct semid_ds *buf;
 	unsigned short *array;
 	struct seminfo *__buf;
 };
+*/
 
 int createSemaphore(int key, int value) {
 	int sd = semget(key, 1, IPC_CREAT | IPC_EXCL | 0644);
