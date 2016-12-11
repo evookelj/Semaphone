@@ -37,6 +37,10 @@ void getUserLine(char *filename, int shmkey, int semkey) {
   sb.sem_op = -1;
   semop(semid, &sb, 1);
   
+	char *lastLine = getLastLine(filename, shmkey);
+	printf("Last line: %s\n", lastLine);
+	free(lastLine);
+
   char newLine[10000];
   printf("Your turn: ");
   fgets(newLine, sizeof(newLine), stdin);
@@ -61,12 +65,9 @@ void getUserLine(char *filename, int shmkey, int semkey) {
 
 int main() {
   char *filename = "story.txt";
-  int shm_key = ftok("resources.c", 7);
-  int sem_key = ftok("resources.c", 8);
-	char *ll = getLastLine(filename, shm_key);
-	printf("last line: %s\n", ll);
-	free(ll);
-  getUserLine(filename, shm_key, sem_key);
+  int shmkey = ftok("resources.c", 7);
+  int semkey = ftok("resources.c", 8);
+  getUserLine(filename, shmkey, semkey);
   
   return 0;
 }
