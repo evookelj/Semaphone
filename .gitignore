@@ -1,3 +1,7 @@
+resources
+telephone
+story.txt
+
 # Object files
 *.o
 *.ko
