@@ -8,6 +8,7 @@
 #include <sys/shm.h>
 #include <sys/sem.h>
 #include <string.h>
+#include <errno.h>
 
 union semun {
 	int val;
@@ -72,29 +73,57 @@ int main(int argc, char **argv) {
 	if (strcmp(argv[1], "-c") == 0) {
 		umask(0000);
 		int file = open(filename, O_CREAT | O_WRONLY | O_TRUNC, 0644);
-		printf("Created %s\n", filename);
-		close(file);
+
+		if (file < 0) {
+			printf("Unable to create file %s: %s\n", filename, strerror(errno));
+			return 1;
+		} else {
+			printf("Successfully created %s\n", filename);		
+			close(file);
+		}
 
 		int shm = shmget(shm_key, sizeof(int), IPC_CREAT | IPC_EXCL | 0644);
-		printf("Created shared memory %d\n", shm);
+
+		if (shm < 0) {
+			printf("Unable to allocate shared memory: %s\n", strerror(errno));
+			return 1;
+		} else {
+			printf("Successfully created shared memory\n");
+		}
 
 		int sem = createSemaphore(sem_key, sem_value);
-		printf("Created semaphore %d with value %d\n", sem, sem_value);
+
+		if (sem < 0) {
+			printf("Unable to create semaphore: %s\n", strerror(errno));
+			return 1;
+		} else {
+			printf("Successfully created semaphore\n");
+		}
 	} else if (strcmp(argv[1], "-v") == 0) {
 		char *s = readFile(filename);
-		printf("%s\n", s);
+		printf("%s", s);
 		free(s);
 	} else if (strcmp(argv[1], "-r") == 0) {
 		int shm = shmget(shm_key, 0, 0);
-		shmctl(shm, IPC_RMID, 0);
-		printf("Removed shared memory %d\n", shm);
-		
+
+		if (shm < 0) {
+			printf("Unable to access shared memory: %s\n", strerror(errno));
+		} else {
+			shmctl(shm, IPC_RMID, 0);
+			printf("Removed shared memory\n");
+		}
+
 		int sem = getSemaphore(sem_key);
-		removeSemaphore(sem);
-		printf("Removed semaphore %d\n", sem);
+
+		if (sem < 0) {
+			printf("Unable to access semaphore: %s\n", strerror(errno));
+		} else {
+			removeSemaphore(sem);
+			printf("Removed semaphore\n");
+		}
 
 		char *s = readFile(filename);
-		printf("%s\n", s);
+		printf("%s", s);
 		free(s);
 	}
 	
